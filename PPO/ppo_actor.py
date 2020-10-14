@@ -38,11 +38,12 @@ class Actor(object):
         h1 = Dense(64, activation='relu')(state_input)
         h2 = Dense(32, activation='relu')(h1)
         h3 = Dense(16, activation='relu')(h2)
-        
-        mu = Dense(self.action_dim, activation='tanh')(h3)
-        std = Dense(self.action_dim, activation='softplus')(h3)
-        
-        model = Model(state_input, [mu, std])
+        out_mu = Dense(self.action_dim, activation='tanh')(h3)
+        std_output = Dense(self.action_dim, activation='softplus')(h3)
+
+        # bound mean
+        mu_output = Lambda(lambda x: x*self.action_bound)(out_mu)
+        model = Model(state_input, [mu_output, std_output])
         return model, model.trainable_weights
 
     def train(self, states, actions, advantages, log_old_policy_pdf):
