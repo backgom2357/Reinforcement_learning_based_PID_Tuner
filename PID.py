@@ -75,8 +75,9 @@ class PID:
         """
         error = self.SetPoint - feedback_value
 
-        self.current_time = current_time if current_time is not None else time.time()
-        delta_time = self.current_time - self.last_time
+#         self.current_time = current_time if current_time is not None else time.time()
+#         delta_time = self.current_time - self.last_time
+        delta_time = 0.03
         delta_error = error - self.last_error
 
         if (delta_time >= self.sample_time):
@@ -93,7 +94,7 @@ class PID:
                 self.DTerm = delta_error / delta_time
 
             # Remember last time and last error for next calculation
-            self.last_time = self.current_time
+#             self.last_time = self.current_time
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)

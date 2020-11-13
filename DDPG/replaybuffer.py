@@ -37,9 +37,8 @@ class ReplayBuffer(object):
         dones = np.asarray([i[4] for i in batch])
         return states, actions, rewards, next_states, dones
 
-
     ## Current buffer occupation
-    def buffer_size(self):
+    def buffer_count(self):
         return self.count
 
     ## Clear buffer

@@ -28,10 +28,11 @@ class Critic(object):
         action_input = Input((self.action_dim,))
         x1 = Dense(64, activation='relu')(state_input)
         x2 = Dense(32, activation='linear')(x1)
-        a1 = Dense(32, activation='linear')(action_input)
-        h2 = concatenate([x2, a1], axis=-1)
+        a1 = Dense(32, activation='relu')(action_input)
+        a2 = Dense(32, activation='linear')(a1)
+        h2 = concatenate([x2, a2], axis=-1)
         h3 = Dense(16, activation='relu')(h2)
-        q_output = Dense(1, activation='linear')(h3)
+        q_output = Dense(1, activation='tanh')(h3)
         model = Model([state_input, action_input], q_output)
         return model, state_input, action_input
     

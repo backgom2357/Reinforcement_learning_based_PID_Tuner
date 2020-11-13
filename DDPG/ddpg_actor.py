@@ -29,7 +29,7 @@ class Actor(object):
         h1 = Dense(64, activation='relu')(state_input)
         h2 = Dense(32, activation='relu')(h1)
         h3 = Dense(16, activation='relu')(h2)
-        out = Dense(self.action_dim, activation='sigmoid')(h3)
+        out = Dense(self.action_dim, activation='tanh')(h3)
         
         # Modify output
         action_output = Lambda(lambda x: x*self.action_bound)(out)
