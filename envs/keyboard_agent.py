@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys, gym, time
-from PID import PID
 
 #
 # Test yourself as a learning agent! Pass environment name as a command-line argument, for example:
