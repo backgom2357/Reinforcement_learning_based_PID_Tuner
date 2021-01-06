@@ -34,7 +34,7 @@ class PID:
     """PID Controller
     """
 
-    def __init__(self, P=0.2, I=0.0, D=0.0, current_time=None):
+    def __init__(self, P=1.2, I=1.0, D=0.0001, current_time=None):
 
         self.Kp = P
         self.Ki = I
@@ -62,22 +62,18 @@ class PID:
         self.output = 0.0
 
     def update(self, feedback_value, current_time=None):
-        """Calculates PID value for given reference feedback
-
+        """
+            Calculates PID value for given reference feedback
         .. math::
             u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
-
         .. figure:: images/pid_1.png
            :align:   center
-
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
-
         """
         error = self.SetPoint - feedback_value
 
-#         self.current_time = current_time if current_time is not None else time.time()
-#         delta_time = self.current_time - self.last_time
-        delta_time = 0.03
+        self.current_time = current_time if current_time is not None else time.time()
+        delta_time = self.current_time - self.last_time
         delta_error = error - self.last_error
 
         if (delta_time >= self.sample_time):
@@ -94,7 +90,7 @@ class PID:
                 self.DTerm = delta_error / delta_time
 
             # Remember last time and last error for next calculation
-#             self.last_time = self.current_time
+            self.last_time = self.current_time
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
