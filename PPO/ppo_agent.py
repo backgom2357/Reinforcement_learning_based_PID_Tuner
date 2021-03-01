@@ -1,11 +1,12 @@
 import numpy as np
+from numpy.core.fromnumeric import clip
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from ppo_actor import Actor
 from ppo_critic import Critic
 
-class PPOagent(object):
+class PPOTunner(object):
 
     def __init__(self, env):
 
@@ -22,11 +23,11 @@ class PPOagent(object):
         # environment
         self.env = env
         # state dimension
-        self.state_dim = env.observation_space.shape[0]
+        self.state_dim = env.observation_space + env.action_space
         # action dimension
-        self.action_dim = env.action_space.shape[0]
+        self.action_dim = env.action_space
         # max action size
-        self.action_bound = env.action_space.high[0]
+        self.action_bound = env.action_bound
 
         # create Actor and Critic neural nets
         self.actor = Actor(self.state_dim, self.action_dim, self.action_bound, self.ACTOR_LEARNING_RATE, self.RATIO_CLIPPING)
@@ -54,10 +55,12 @@ class PPOagent(object):
         return gae, n_stop_targets
 
     # train agent
-    def train(self, max_episode_num):
-
+    def train(self, max_episode_num, plot=False):
+        
         # repeat for each episode
         for ep in range(int(max_episode_num)):
+
+            max_error = 1e10000
 
             # init states, actions, reward
             states, actions, rewards = [], [], []
@@ -67,17 +70,13 @@ class PPOagent(object):
             time, episode_reward, done = 0, 0, False
             # reset env and observe initial state
             state = self.env.reset()
+            state = np.append(state, [0,0,0])
+            best_pid = (0,0,0)
 
             while not done:
 
-                # visualize env
-                self.env.render()
-
                 # get action
                 mu_old, std_old, action = self.actor.get_policy_action(state)
-
-                # bound action range
-                action = np.clip(action, -self.action_bound, self.action_bound)
 
                 # calculate log old policy pdf
                 var_old = std_old**2
@@ -85,12 +84,18 @@ class PPOagent(object):
                 log_old_policy_pdf = np.sum(log_old_policy_pdf)
 
                 # observe next state, reward
-                next_state, reward, done, _ = self.env.step(action)
+                next_state, reward, done, error = self.env.step(action)
+                next_state = np.append(next_state, list(action))
+
+                if error < max_error:
+                    best_pid = (self.env.Kp,self.env.Ki,self.env.Kd)
+                    reward += 1
+                    max_error = error
 
                 # save to batch
                 states.append(state)
                 actions.append(action)
-                rewards.append((reward + 8) / 8)  # modify reward range
+                rewards.append(reward)  # modify reward range
                 log_old_policy_pdfs.append(log_old_policy_pdf)
 
                 # state update
@@ -105,7 +110,6 @@ class PPOagent(object):
                     actions = np.array(actions)
                     rewards = np.array(rewards)
                     log_old_policy_pdfs = np.array(log_old_policy_pdfs)
-
 
                     # calculate n-step TD target and advantage
                     next_state = np.reshape(next_state, [1, self.state_dim])
@@ -123,35 +127,19 @@ class PPOagent(object):
                     states, actions, rewards = [], [], []
                     log_old_policy_pdfs = []
 
-            print("Epi: ", ep+1, "Time: ", time, "Reward: ", episode_reward)
+                print(f'step : {time}, pid : {self.env.Kp:+.3f}, {self.env.Ki:+.3f}, {self.env.Kd:+.3f}, reward : {reward:+.3f}, error : {error:3.1}', end='\r')
+                if plot==True:
+                    self.env.plot((self.env.Kp,self.env.Ki,self.env.Kd), time)
+
             self.save_epi_reward.append(episode_reward)
+            print()
+            print(f'epi : {ep}, pid : {best_pid[0]:+.3f}, {best_pid[1]:+.3f}, {best_pid[2]:+.3f}, episode_reward : {episode_reward:+.4f}')
+            
+            
 
-            if ep % 10 == 0:
-                self.actor.save_weights("./save_weights/pendulum_actor.h5")
-                self.critic.save_weights("./save_weights/pendulum_actor.h5")
+        self.actor.save_weights("/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/PPO/save_weights/pid_actor.h5")
+        self.critic.save_weights("/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/PPO/save_weights/pid_actor.h5")
 
-        np.savetxt('.save_weights/pendulum_epi_reward.txt', self.save_epi_reward)
+        np.savetxt('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/PPO/save_weights/pid_epi_reward.txt', self.save_epi_reward)
         print(self.save_epi_reward)
-
-    # graph episodes and rewards
-    def plot_result(self):
-        plt.plot(self.save_epi_reward)
-        plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

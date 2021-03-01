@@ -21,7 +21,7 @@ class Actor(object):
         self.ratio_clipping = ratio_clipping
 
         # set min and max of standard deviation
-        self.std_bound = [1e-2, 1.0]
+        self.std_bound = [1e-3, 1]
 
         # create actor neural net
         self.model, self.theta = self.build_network()
@@ -38,7 +38,7 @@ class Actor(object):
         h1 = Dense(64, activation='relu')(state_input)
         h2 = Dense(32, activation='relu')(h1)
         h3 = Dense(16, activation='relu')(h2)
-        out_mu = Dense(self.action_dim, activation='tanh')(h3)
+        out_mu = Dense(self.action_dim, activation='linear')(h3)
         std_output = Dense(self.action_dim, activation='softplus')(h3)
 
         # bound mean

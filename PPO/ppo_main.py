@@ -1,17 +1,14 @@
-import gym
-from ppo_agent import PPOagent
+import sys
+sys.path.append('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/')
+
+from envs.sample_env import PIDsampleEnv
+from ppo_agent import PPOTunner
 
 def main():
     max_episode_num = 1000
-    env_name = 'Pendulum-v0'
-    env = gym.make(env_name)
-    agent = PPOagent(env)
-
-    # train
-    agent.train(max_episode_num)
-
-    # visualization
-    agent.plot_result()
+    env = PIDsampleEnv()
+    tunner = PPOTunner(env)
+    tunner.train(max_episode_num, plot=True)
 
 if __name__ =='__main__':
     main()
