@@ -5,7 +5,7 @@ from PID import PID
 
 class PIDsampleEnv(PID):
     
-    def __init__(self, P=0.2, I=0.0, D=0.0, alpha=0.01, set_point=1):
+    def __init__(self, P=0.2, I=0.2, D=0.0, alpha=0.01, set_point=1):
         super().__init__()
         
         self.Kp = P
@@ -17,9 +17,19 @@ class PIDsampleEnv(PID):
         self.end = 50
 
         self.count = 0
+
+        self.observation_space = (50)
+        self.action_space = (3)
+        self.action_bound = (2)
         
     def reset(self):
-        self.clear()
+        super().clear()
+        # self.Kp = np.random.uniform(0,2)
+        # self.Ki = np.random.uniform(0,2)
+        # self.Kd = np.random.uniform(0,0.01)
+        self.Kp = 0.2
+        self.Ki = 0.2
+        self.Kd = 0.
         self.count = 0
         return np.zeros(self.end)
     
@@ -33,7 +43,7 @@ class PIDsampleEnv(PID):
 
         self.Kp += self.alpha * action[0]
         self.Ki += self.alpha * action[1]
-        self.Kd += self.alpha * 0.1 * action[2]
+        self.Kd += self.alpha * 0.01 * action[2]
         next_state = []
         
         for i in range(1, self.end+1):
@@ -46,10 +56,10 @@ class PIDsampleEnv(PID):
                 self.SetPoint = 1
 
             error_sum += abs(self.last_error)
-            
+
             next_state.append(feedback)
         
-        reward = max(-error_sum + self.SetPoint, -1)
+        reward = (max(-error_sum, -160) + 80)/80
         
         if error_sum < 0.04 * (self.end - 11):
             reward = 10
@@ -62,7 +72,7 @@ class PIDsampleEnv(PID):
         
         return next_state, reward, done, error_sum
     
-    def plot(self, epi=None):
+    def plot(self, pid, step):
 
         feedback = 0.0
         self.SetPoint = 0.0
@@ -70,6 +80,8 @@ class PIDsampleEnv(PID):
         feedback_list = []
         time_list = []
         setpoint_list = []
+
+        self.Kp, self.Ki, self.Kd = pid[0], pid[1], pid[2]
 
         for i in range(1, self.end+1):
             
@@ -98,7 +110,7 @@ class PIDsampleEnv(PID):
         plt.xlim((0, self.end))
         plt.xlabel('time (s)')
         plt.ylabel('PID (PV)')
-        plt.title('TEST PID')
+        plt.title(f'{pid[0]:.2f}, {pid[1]:.2f}, {pid[2]:.2f}, {step}step')
         plt.ylim((-self.set_point*1.3, self.set_point*1.3))
         # if epi:
         #     plt.savefig(f"./{epi}.png")
