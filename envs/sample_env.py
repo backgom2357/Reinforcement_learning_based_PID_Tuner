@@ -61,7 +61,7 @@ class PIDsampleEnv(PID):
         
         reward = (max(-error_sum, -160) + 80)/80
         
-        if error_sum < 0.04 * (self.end - 11):
+        if error_sum < 0.05 * (self.end - 11):
             reward = 10
             done = True
         
