@@ -50,7 +50,7 @@ class PID:
         """Clears PID computations and coefficients"""
         self.SetPoint = 0.0
 
-        self.PTerm = 0.0
+        self.PTerm = 0.2
         self.ITerm = 0.0
         self.DTerm = 0.0
         self.last_error = 0.0
