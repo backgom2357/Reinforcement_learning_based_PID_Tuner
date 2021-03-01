@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 import cv2
 import time
 
-from PID import PID
+import sys
+sys.path.append('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/')
 
+from PID import PID
 cenv = gym.make("LunarLanderContinuous-v2")
 
 SKIP_CONTROL = 0    # Use previous control decision SKIP_CONTROL times, that's how you
