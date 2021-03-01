@@ -1,5 +1,5 @@
-# Reinforcement Learning based PID Tunner
-The implemetation of the Reinforcement Learning based PID Tunner. Try to build tunner system with [PPO](https://arxiv.org/abs/1707.06347) and [Double DQN](https://arxiv.org/abs/1509.06461) algorithm. Combine RL algorithm to PID contorller. Using two different method to update (P, I, D) tuple.
+# Reinforcement Learning based PID Tuner
+The implemetation of the Reinforcement Learning based PID Tuner. Try to build tuner system with [PPO](https://arxiv.org/abs/1707.06347) and [Double DQN](https://arxiv.org/abs/1509.06461) algorithm. Combine RL algorithm to PID contorller. Using two different method to update (P, I, D) tuple.
 
 
 # Procedure
@@ -49,7 +49,7 @@ Using Simple PID control example to build PID environment.
 
 <br>
 
-## (P, I, D) from Tunner
+## (P, I, D) from Tuner
 method 1
 - (0.8311611133067119, 1.067838020900425, -0.0006975578421864661)
 - (0.8799401544613751, 1.1651741645523848, 0.002376775442951846)
