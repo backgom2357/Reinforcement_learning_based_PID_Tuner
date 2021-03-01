@@ -67,7 +67,7 @@ def rollout(env):
         while human_sets_pause:
             env.render()
             time.sleep(0.1)
-        time.sleep(0.01)
+        time.sleep(0.05)
     print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
 
 print("ACTIONS={}".format(ACTIONS))
