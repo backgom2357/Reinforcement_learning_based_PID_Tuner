@@ -44,7 +44,8 @@ Using Simple PID control example to build PID environment.
     <br>Plot PID control result
 
 # Result
-## Please check here - [Experiment Report (Korean)](https://www.notion.so/RL-based-PID-Tunner-add9501d8c8d422eba55101da27d9072)
+
+### Please check here - [Experiment Report (Korean)](https://www.notion.so/RL-based-PID-Tunner-add9501d8c8d422eba55101da27d9072)
 
 <br>
 
@@ -86,4 +87,5 @@ gym
 
 # reference
 https://github.com/ivmech/ivPID
+
 https://github.com/pasus/Reinforcement-Learning-Book
