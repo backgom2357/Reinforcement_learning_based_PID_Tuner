@@ -59,7 +59,7 @@ method 2
 - (1.253136190601821, 0.620026107056804, -0.002720052821954503)
 
 ## Apply PID control in [Lunarlander-v2](https://gym.openai.com/envs/LunarLander-v2/)
-- Human Control
+- Given Control
 
 ![result](https://user-images.githubusercontent.com/30210944/109546631-d13a9200-7b0d-11eb-9202-d2d6cb590191.gif)
 
