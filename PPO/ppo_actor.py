@@ -38,7 +38,7 @@ class Actor(object):
         h1 = Dense(64, activation='relu')(state_input)
         h2 = Dense(32, activation='relu')(h1)
         h3 = Dense(16, activation='relu')(h2)
-        out_mu = Dense(self.action_dim, activation='linear')(h3)
+        out_mu = Dense(self.action_dim, activation='relu')(h3)
         std_output = Dense(self.action_dim, activation='softplus')(h3)
 
         # bound mean
@@ -88,5 +88,5 @@ class Actor(object):
 
     # load Actor parameter
     def load_weights(self, path):
-        self.model.load_weights(path+'pendulum_actor.h5')
+        self.model.load_weights(path)
 

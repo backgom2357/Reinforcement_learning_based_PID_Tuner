@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from ppo_actor import Actor
 from ppo_critic import Critic
 
+
 class PPOTunner(object):
 
     def __init__(self, env):
@@ -23,7 +24,7 @@ class PPOTunner(object):
         # environment
         self.env = env
         # state dimension
-        self.state_dim = env.observation_space + env.action_space
+        self.state_dim = env.observation_space
         # action dimension
         self.action_dim = env.action_space
         # max action size
@@ -55,7 +56,11 @@ class PPOTunner(object):
         return gae, n_stop_targets
 
     # train agent
-    def train(self, max_episode_num, plot=False):
+    def train(self, max_episode_num, plot=False, on_wandb = False):
+
+        if on_wandb:
+            import wandb
+            wandb.init(project='pidTuner', entity='diominor')
         
         # repeat for each episode
         for ep in range(int(max_episode_num)):
@@ -70,8 +75,8 @@ class PPOTunner(object):
             time, episode_reward, done = 0, 0, False
             # reset env and observe initial state
             state = self.env.reset()
-            state = np.append(state, [0,0,0])
-            best_pid = (0,0,0)
+            
+            mean_v = 0
 
             while not done:
 
@@ -85,12 +90,6 @@ class PPOTunner(object):
 
                 # observe next state, reward
                 next_state, reward, done, error = self.env.step(action)
-                next_state = np.append(next_state, list(action))
-
-                if error < max_error:
-                    best_pid = (self.env.Kp,self.env.Ki,self.env.Kd)
-                    reward += 1
-                    max_error = error
 
                 # save to batch
                 states.append(state)
@@ -127,13 +126,17 @@ class PPOTunner(object):
                     states, actions, rewards = [], [], []
                     log_old_policy_pdfs = []
 
-                print(f'step : {time}, pid : {self.env.Kp:+.3f}, {self.env.Ki:+.3f}, {self.env.Kd:+.3f}, reward : {reward:+.3f}, error : {error:3.1}', end='\r')
-                if plot==True:
-                    self.env.plot((self.env.Kp,self.env.Ki,self.env.Kd), time)
+                    mean_v += np.mean(v_values)/self.t_MAX
 
-            self.save_epi_reward.append(episode_reward)
+                print(f'step : {time}, pid : {self.env.Kp:+.3f}, {self.env.Ki:+.3f}, {self.env.Kd:+.3f}, reward : {reward:+.3f}, error : {error:3.1f}', end='\r')
+                if plot==True:
+                    self.env.plot()
             print()
-            print(f'epi : {ep}, pid : {best_pid[0]:+.3f}, {best_pid[1]:+.3f}, {best_pid[2]:+.3f}, episode_reward : {episode_reward:+.4f}')
+            print(f'epi : {ep}, episode_reward : {episode_reward:+.3f}, mean v : {mean_v/time}')
+            if on_wandb: wandb.log({'episode reward': episode_reward, 'mean v': mean_v/time})
+            
+            self.save_epi_reward.append(episode_reward)
+            # print()
             
             
 
