@@ -1,5 +1,5 @@
 # Reinforcement Learning based PID Tuner
-The implemetation of the Reinforcement Learning based PID Tuner. Try to build tuner system with [PPO](https://arxiv.org/abs/1707.06347) and [Double DQN](https://arxiv.org/abs/1509.06461) algorithm. Combine RL algorithm to PID contorller. Using two different method to update (P, I, D) tuple.
+This project is the implemetation of the Reinforcement Learning based Online PID Tuner. The Tuner is based on [A2C](https://arxiv.org/abs/1602.01783). I trained the RL tuner and tested on Lunarlander, one of OpenAi gym env..
 
 
 # Procedure
@@ -27,21 +27,10 @@ end for
 ## Environment
 Using Simple PID control example to build PID environment.
 - MDP
-    - state (50,) : The stack of feedbacks for 50 steps
-    - action (3,) : Values to update (P, I, D) 
-    - reward (1,) : (max(abs(error sum for 50 steps), -160) + 80)/80 (10 if done properly)
-    - done (1,) : abs(error sum for 50 steps < 0.05 * (# of steps)
+    - state (5,) : Set Point, feedback, error, I-term, P
+    - action (1,) : P
+    - reward (1,) : if abs(error) in a certain range, give 1. Or, give -1
 
-- Method
-    - reset() : 
-    <br>Initialize variables (including (P, I, D))
-    - step(action) : 
-    <br> Run 50 steps of PID control example with given (P, I, D).
-    <br> Return next_state, reward, done, error_sum
-        - (method 1) (P, I, D) = (P + action[0], I + action[1], D + action[2])
-        - (method 2) (P, I, D) = (action[0], action[1], action[2])
-    - plot() :
-    <br>Plot PID control result
 
 # Result
 
@@ -49,33 +38,44 @@ Using Simple PID control example to build PID environment.
 
 <br>
 
-## (P, I, D) from Tuner
-method 1
-- (0.8311611133067119, 1.067838020900425, -0.0006975578421864661)
-- (0.8799401544613751, 1.1651741645523848, 0.002376775442951846)
+## Pretrain result
+- Before training
 
-method 2
-- (0.816297709601598, 1.1406315660539015, 0.002037705470730431)
-- (1.253136190601821, 0.620026107056804, -0.002720052821954503)
+![101b](https://user-images.githubusercontent.com/30210944/113843222-5cbed700-97ce-11eb-8119-c382f48987ab.png)
 
-## Apply PID control in [Lunarlander-v2](https://gym.openai.com/envs/LunarLander-v2/)
-- Given Control
+- After training
 
-![result](https://user-images.githubusercontent.com/30210944/109546631-d13a9200-7b0d-11eb-9202-d2d6cb590191.gif)
+![101a](https://user-images.githubusercontent.com/30210944/113843357-795b0f00-97ce-11eb-9060-2bc16a63cbf8.png)
 
-- PID Control <br> (P, I, D) = (1.253136190601821, 0.620026107056804, -0.002720052821954503)
+- Training plot
 
-![pid_ctr_result](https://user-images.githubusercontent.com/30210944/109546804-00e99a00-7b0e-11eb-84b0-f61d8cc3db40.gif)
+![Untitled](https://user-images.githubusercontent.com/30210944/113843564-a4456300-97ce-11eb-9cac-64482840b10a.png)
 
+
+
+## Test PID control with auto tuner in [Lunarlander-v2](https://gym.openai.com/envs/LunarLander-v2/)
+It do not need any tuning process.
+- Render
+
+![tuner_applied](https://user-images.githubusercontent.com/30210944/113843894-f1c1d000-97ce-11eb-9b14-f00e9e22cfd9.gif)
+
+- Error Plot
+
+![image](https://user-images.githubusercontent.com/30210944/113844367-5ed56580-97cf-11eb-9cd3-8a7f8f6f42d0.png)
+
+Orange line represents set-points, and blue line represents feedbacks. (left) Angular controller. (Right) Vertical controller.
 
 # Usage
 ### Training
 ```
-cd ./PPO/
-python ppo_main.py
+cd ./A2C/
+python a2c_main.py
 ```
 ### Test
-Follow [pid_control_test.ipynb](https://github.com/backgom2357/reinforcement-learning-based-PID-tunner/blob/master/pid_control_test.ipynb)
+```
+cd ./envs/
+python ./LunarLanderContinuous_keyboard_agent_tuner_applied.py
+```
 
 # requirements
 ```
