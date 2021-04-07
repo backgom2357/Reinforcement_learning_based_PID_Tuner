@@ -10,3 +10,7 @@ __pycache__/
 *.gif
 
 wandb/
+
+data/
+
+A2C/save_weights/
