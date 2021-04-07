@@ -62,8 +62,8 @@ def rollout(env):
     done = False
     action = [0,0]
 
-    apid = PID(1.253136190601821, 0.620026107056804, -0.002720052821954503)
-    vpid = PID(1.253136190601821, 0.620026107056804, -0.002720052821954503)
+    apid = PID(2,0,0)
+    vpid = PID(2,0,0)
     apid.SetPoint=0
     vpid.SetPoint=0
 
@@ -85,7 +85,7 @@ def rollout(env):
         vpid_sp_list.append(vpid.SetPoint)
 
         apid.update(n_state[4])
-        action[1] = (-apid.output*2.5 + n_state[5])*20
+        action[1] = (-apid.output*2.5  + n_state[5])*20
 
         vpid.update(n_state[3])
         action[0] = vpid.output
