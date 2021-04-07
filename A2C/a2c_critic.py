@@ -43,4 +43,4 @@ class Critic(object):
 
     # load Critic parameter
     def load_weights(self, path):
-        self.model.load_weights(path+'pendulum_critic.h5')
+        self.model.load_weights(path)

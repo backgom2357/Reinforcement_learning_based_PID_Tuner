@@ -102,7 +102,7 @@ class A2Cagent(object):
 
                 print(f'step : {time}, pid : {self.env.Kp:+.3f}, {self.env.Ki:+.3f}, {self.env.Kd:+.3f}, reward : {reward[0][0]:+.3f}, error : {error:3.1f}', end='\r')
                 if plot==True:
-                    self.env.plot()
+                    self.env.plot(done)
 
                 # wait for full batch
                 if len(batch_state) < self.BATCH_SIZE:
@@ -149,12 +149,15 @@ class A2Cagent(object):
 
 
 
-    def test(self):
+    def test(self, plot):
 
         # Initialize model
-
-        # init batch
-        batch_state, batch_action, batch_td_target, batch_advantage = [], [], [], []
+        state = np.zeros((1, self.state_dim))
+        self.actor.get_action(state)
+        self.critic.model(state)
+        self.actor.load_weights('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_actor499.h5')
+        self.critic.load_weights('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_critic499.h5')
+        
         # init episode
         time, episode_reward, done = 0, 0, False
         # reset env and observe initial state
@@ -172,7 +175,7 @@ class A2Cagent(object):
             action = np.clip(action, -self.action_bound, self.action_bound)
 
             # observe next state, reward
-            next_state, reward, done, _ = self.env.step(action)
+            next_state, reward, done, error = self.env.step(action)
 
             # reshape
             state = np.reshape(state, [1, self.state_dim])
@@ -180,51 +183,16 @@ class A2Cagent(object):
             action = np.reshape(action, [1, self.action_dim])
             reward = np.reshape(reward, [1, 1])
 
-            # calculate state value
-            v_value = self.critic.model(state)
-            next_v_value = self.critic.model(next_state)
-
-            # calculate advantage and TD target
-            train_reward = (reward + 8) / 8
-            advantage, y_i = self.advantage_td_target(train_reward, v_value, next_v_value, done)
-
-            # append to batch
-            batch_state.append(state)
-            batch_action.append(action)
-            batch_td_target.append(y_i)
-            batch_advantage.append(advantage)
-
-            # wait for full batch
-            if len(batch_state) < self.BATCH_SIZE:
-                # update state
-                state = next_state[0]
-                episode_reward += reward[0]
-                time += 1
-                continue
-
-            # train
-            # extract from batch
-            states = self.unpack_batch(batch_state)
-            actions = self.unpack_batch(batch_action)
-            td_targets = self.unpack_batch(batch_td_target)
-            advantages = self.unpack_batch(batch_advantage)
-
-            # clear batch
-            batch_state, batch_action, batch_td_target, batch_advantage = [], [], [], []
-
-            # critic neural net update
-            self.critic.train_on_batch(states, td_targets)
-
-            # actor neural net update
-            self.actor.train(states, actions, advantages)
-
             # update state
             state = next_state[0]
             episode_reward += reward[0]
             time += 1
 
-        self.actor.load_weights('./save_weights/')
-        self.critic.load_weights('./save_weights/')
+            print(f'step : {time}, pid : {self.env.Kp:+.3f}, {self.env.Ki:+.3f}, {self.env.Kd:+.3f}, reward : {reward[0][0]:+.3f}, error : {error:3.1f}', end='\r')
+            if plot==True:
+                self.env.plot(done)
+
+        
 
 
     # graph episodes and rewards

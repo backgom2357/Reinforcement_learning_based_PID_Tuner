@@ -104,7 +104,7 @@ class PIDsampleEnv(PID):
         
         return next_state, reward, self.done, self.last_error
     
-    def plot(self):
+    def plot(self, done):
 
         is_ipython = 'inline' in matplotlib.get_backend()
         if is_ipython:
@@ -119,8 +119,8 @@ class PIDsampleEnv(PID):
         plt.xlabel('time (s)')
         plt.ylabel('PID (PV)')
         plt.title(f'{self.timestep}step')
-        # if epi:
-        #     plt.savefig(f"./{epi}.png")
+        if done:
+            plt.savefig(f"./{self.timestep}.png")
         plt.pause(0.01)
         if is_ipython:
             display.clear_output(wait=True)

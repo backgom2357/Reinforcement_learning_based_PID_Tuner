@@ -14,7 +14,10 @@ def main():
 
 
     # train
-    agent.train(max_episode_num, plot=True, on_wandb=True)
+    # agent.train(max_episode_num, plot=True)
+
+    # test
+    agent.test(plot=True)
 
 if __name__ == "__main__":
     main()
