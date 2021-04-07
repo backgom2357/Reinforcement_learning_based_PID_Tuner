@@ -78,6 +78,10 @@ class PPOTunner(object):
             
             mean_v = 0
 
+            # for _ in range(10):
+            #     next_state, reward, done, error = self.env.step(np.zeros(3))
+            #     state = next_state
+
             while not done:
 
                 # get action

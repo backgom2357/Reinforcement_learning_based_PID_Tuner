@@ -19,9 +19,9 @@ class PIDsampleEnv(PID):
 
         self.count = 0
 
-        self.observation_space = (8)
-        self.action_space = (3)
-        self.action_bound = (1)
+        self.observation_space = (5)
+        self.action_space = (1)
+        self.action_bound = (2)
 
         self.feedback = 0
         self.timestep = 0
@@ -55,50 +55,52 @@ class PIDsampleEnv(PID):
         self.time_list = []
         self.feedbacks = []
         self.setPoints = []
-        return np.array([self.feedback, self.last_error, self.PTerm, self.ITerm, self.DTerm, self.Kp, self.Ki, self.Kd])
+        return np.zeros(self.observation_space)
     
     def step(self, action):
 
         self.timestep += 1
 
         self.Kp = action[0]
-        self.Ki = action[1]
-        self.Kd = 0.01 * action[2]
 
-        next_state = []
-        
+        next_state = []        
+
         self.update(self.feedback)
         output = self.output
             
         self.feedback += output
 
         if self.timestep > 10:
-            self.SetPoint = self.set_point
-            time.sleep(0.01)
+            if (self.timestep)//10%2==1:
+                self.SetPoint = self.set_point
+            else:
+                self.SetPoint = -self.set_point
+            time.sleep(0.02)
+
+        # plot
+        self.feedbacks.append(self.feedback)
+        self.setPoints.append(self.SetPoint)
         
         next_state.append(self.SetPoint)
-        next_state.append(self.last_error/(abs(self.SetPoint)*1.5) if self.SetPoint else 0)
-        next_state.extend([self.PTerm, self.ITerm, self.DTerm])
-        next_state.extend([self.Kp, self.Ki, self.Kd])
+        next_state.append(round(self.feedback, 3) if self.SetPoint else 0)
+        next_state.append(round(self.last_error,3))
+        next_state.append(round(self.ITerm,3))
+        next_state.append(round(self.Kp,3))
         
-        # reward = 1 if abs(self.last_error) < 0.01 else -1
-        reward = -abs(self.last_error)
+        reward = 1 if abs(self.last_error) < 0.1 else -1
+        # reward = -abs(self.last_error)
         
         self.count += 1
 
-        if self.count > 30:
+        if self.count > 100:
             self.done = True
-        if abs(self.last_error) > abs(self.SetPoint)*1.5:
+
+        if abs(self.last_error) > abs(self.SetPoint)*3:
             reward = -5
             self.done = True
         
         if self.timestep <= 9:
             reward = 0
-
-        # plot
-        self.time_list.append(self.timestep)
-        self.feedbacks.append(self.feedback)
-        self.setPoints.append(self.SetPoint)
         
         return next_state, reward, self.done, self.last_error
     
@@ -112,8 +114,8 @@ class PIDsampleEnv(PID):
 
         plt.figure(2)
         plt.clf()
-        plt.plot(self.time_list, self.feedbacks)
-        plt.plot(self.time_list, self.setPoints)
+        plt.plot(self.feedbacks)
+        plt.plot(self.setPoints)
         plt.xlabel('time (s)')
         plt.ylabel('PID (PV)')
         plt.title(f'{self.timestep}step')

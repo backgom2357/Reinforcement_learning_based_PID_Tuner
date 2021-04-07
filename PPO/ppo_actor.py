@@ -38,7 +38,7 @@ class Actor(object):
         h1 = Dense(64, activation='relu')(state_input)
         h2 = Dense(32, activation='relu')(h1)
         h3 = Dense(16, activation='relu')(h2)
-        out_mu = Dense(self.action_dim, activation='relu')(h3)
+        out_mu = Dense(self.action_dim, activation='sigmoid')(h3)
         std_output = Dense(self.action_dim, activation='softplus')(h3)
 
         # bound mean
