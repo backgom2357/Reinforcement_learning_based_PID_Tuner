@@ -1,6 +1,10 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import os
+from glob import glob
+
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 from A2C.a2c_actor import Actor
 from A2C.a2c_critic import Critic
@@ -54,6 +58,8 @@ class A2Cagent(object):
         if on_wandb:
             import wandb
             wandb.init(project='pidTuner', entity='diominor')
+            
+        best_episode_reward = -1
 
         # repeat for each episode
         for ep in range(int(max_episode_num)):
@@ -136,17 +142,18 @@ class A2Cagent(object):
 
                 mean_v += np.mean(self.critic.model(np.array([state])))
 
-                
-
             print()
             print(f'epi : {ep}, episode_reward : {episode_reward:+.3f}, mean v : {mean_v/time}')
             if on_wandb: wandb.log({'episode reward': episode_reward, 'mean v': mean_v/time})
             self.save_epi_reward.append(episode_reward)
+            
+            if best_episode_reward < episode_reward:
+                self.actor.save_weights(os.path.join(CURRENT_DIR, f'save_weights/tunner_actor_crt.h5'))
+                self.critic.save_weights(os.path.join(CURRENT_DIR, f'save_weights/tunner_critic_crt.h5'))
 
-            if (ep+1)%500==0:
-                self.actor.save_weights(f'/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_actor{ep}.h5')
-                self.critic.save_weights(f'/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_critic{ep}.h5')
-
+            if (ep+1)%10==0:
+                self.actor.save_weights(os.path.join(CURRENT_DIR, f'save_weights/tunner_actor{ep}.h5'))
+                self.critic.save_weights(os.path.join(CURRENT_DIR, f'save_weights/tunner_critic{ep}.h5'))
 
 
     def test(self, plot):
@@ -155,8 +162,8 @@ class A2Cagent(object):
         state = np.zeros((1, self.state_dim))
         self.actor.get_action(state)
         self.critic.model(state)
-        self.actor.load_weights('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_actor499.h5')
-        self.critic.load_weights('/home/diominor/Workspace/reinforcement-learning-based-PID-tunner/A2C/save_weights/tunner_critic499.h5')
+        self.actor.load_weights(os.path.join(CURRENT_DIR, "save_weights/tunner_actor_crt.h5"))
+        self.critic.load_weights(os.path.join(CURRENT_DIR, "save_weights/tunner_critic_crt.h5"))
         
         # init episode
         time, episode_reward, done = 0, 0, False

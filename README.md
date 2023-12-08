@@ -79,9 +79,9 @@ python ./LunarLanderContinuous_keyboard_agent_tuner_applied.py
 
 # requirements
 ```
-tensorflow==2.2.0
+tensorflow==2.5.0
 scikit-learn==0.23.2
-matplotlib==3.3.3
+matplotlib==3.8.3
 gym
 ```
 
